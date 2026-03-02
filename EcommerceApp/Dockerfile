@@ -1,10 +1,10 @@
-FROM maven:3.9-eclipse-temurin-17 AS builder
+FROM maven:3.9-eclipse-temurin-17 AS noel
 WORKDIR /app
 COPY . .
 RUN mvn clean install -DskipTests
 
-FROM eclipse-temurin:17-jre
-RUN mkdir -p app/app_jar
-COPY --from=builder /app/target/*.jar /app/app_jar
+FROM tomcat:9.0-jdk17-temurin
+RUN rm -rf /usr/local/tomcat/webapps/*
+COPY --from=noel /app/target/*.war /usr/local/tomcat/webapps/
 EXPOSE 8080
-ENTRYPOINT [ "java","-jar","/app/app_jar/EcommerceApp.jar" ]
+CMD [ "catalina.sh", "run" ]
